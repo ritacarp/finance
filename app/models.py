@@ -36,9 +36,9 @@ class Orders(db.Model):
     __tablename__ = "orders"
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'),  nullable=False)
-    type = db.Column(db.String, nullable=True)
+    transaction_type = db.Column(db.String, nullable=True)
     symbol = db.Column(db.String, nullable=True)
-    name = db.Column(db.String, nullable=True)
+    company_name = db.Column(db.String, nullable=True)
     shares = db.Column(db.Integer, nullable=True)
     price = db.Column(db.Float, nullable=True)
     extended_price = db.Column(db.Float, nullable=True)
