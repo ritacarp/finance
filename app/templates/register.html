@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Log In
+{% endblock %}
+
+{% block main %}
+
+    <form action="/register" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Your Email Address" type="text">
+        </div>
+        <div class="form-group border">
+            <a href="#" data-toggle="tooltip" data-placement="right" data-html=true data-placement="right" title="Minimum 6 characters,<br>at least one numeral,<br>at least one uppercase letter,<br>at least one lowercase letter,<br>at least one symbol $!#%_~">
+            <input class="form-control" name="password" placeholder="Password" type="password">
+            </a>
+        </div>
+        <div class="form-group">
+            <input class="form-control" name="verifyPassword" placeholder="Password (again)" type="password">
+        </div>
+        <div class="form-group">
+            <input class="form-control" name="mobile" placeholder="Mobile Phone Number" type="text">
+        </div>
+
+        <button class="btn btn-primary" type="submit">Register</button>
+    </form>
+
+<script>
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
+
+</script>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block main %}
+
+<div>
+<div><img style="vertical-align: middle;padding-bottom:10px" src="/static/images/information.png" /></div>
+{{ title }}
+<h6>A share of {{ stockCompanyName }} ({{ stockSymbol }} ) costs {{ stockLatestPrice | usd }}.</h6>
+</div>
+
+<div style="padding-top:20px">
+<button type="button" class="btn btn-primary btn-sm buyButton" id="buy_{{ stockSymbol }}">Buy {{ stockSymbol }}</button>
+<button type="button" class="btn btn-primary btn-sm sellButton" id="sell_{{ stockSymbol }}">Sell {{ stockSymbol }}</button>
+</div>
+
+<script>
+
+
+  $('.sellButton').on('click', function () {
+     var thisID = $(this).attr("id" )
+     thisSymbol = thisID.replace("sell_", "")
+     var url = "/sell/" + thisSymbol
+     //var url = "{{ url_for('sell', args='ARGUMENTS') }}".replace("ARGUMENTS", thisSymbol)
+     window.location.replace(url);
+
+  });
+
+
+  $('.buyButton').on('click', function () {
+     var thisID = $(this).attr("id" )
+     thisSymbol = thisID.replace("buy_", "")
+     var url = "/buy/" + thisSymbol
+     window.location.replace(url);
+
+  });
+
+
+</script>
+
+
+
+
+{% endblock %}

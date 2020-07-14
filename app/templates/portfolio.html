@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block main %}
+
+   <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Symbol</th>
+                <th>Name</th>
+                <th>Shares</th>
+                <th>Price</th>
+                <th>TOTAL</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tfoot>
+            <tr>
+                <td colspan="4"></td>
+                <td><span style="font-weight:bold">{{ accountTotal | usd }}</span></td>
+                <td>&nbsp;</td>
+            </tr>
+        </tfoot>
+
+        <tbody>
+            {% for rows in allStocks %}
+            <tr>
+                   {% for item in rows %}
+                    <td>{{item}}</td>
+                   {% endfor %}
+                   <td>
+                      <button type="button" class="btn btn-primary btn-sm quoteButton" id="quote_{{ rows[0] }}">Quote</button>
+                      <button type="button" class="btn btn-primary btn-sm buyButton" id="buy_{{ rows[0] }}">Buy</button>
+                      <button type="button" class="btn btn-primary btn-sm sellButton" id="sell_{{ rows[0] }}">Sell</button>
+                   </td>
+
+
+            </tr>
+            {% endfor %}
+
+            <tr>
+
+                <td>CASH</td>
+                <td colspan="3">&nbsp;</td>
+                <td>{{ cash | usd }}</td>
+                <td>&nbsp;</td>
+            </tr>
+        </tbody>
+
+    </table>
+
+<script>
+
+
+  $('.sellButton').on('click', function () {
+     var thisID = $(this).attr("id" )
+     thisSymbol = thisID.replace("sell_", "")
+     //var url = "/sell/" + thisSymbol
+     var url = "{{ url_for('sell', args='ARGUMENTS') }}".replace("ARGUMENTS", thisSymbol)
+     window.location.replace(url);
+
+  });
+
+
+  $('.buyButton').on('click', function () {
+     var thisID = $(this).attr("id" )
+     thisSymbol = thisID.replace("buy_", "")
+     var url = "/buy/" + thisSymbol
+     window.location.replace(url);
+
+  });
+
+
+  $('.quoteButton').on('click', function () {
+     var thisID = $(this).attr("id" )
+     thisSymbol = thisID.replace("quote_", "")
+     var url = "/quote/" + thisSymbol
+     window.location.replace(url);
+
+  });
+</script>
+
+
+{% endblock %}
+
+

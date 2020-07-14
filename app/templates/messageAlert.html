@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{ image | stringSlice(".", 0) | title }}
+{% endblock %}
+
+{% block main %}
+    <div style="margin-top:-25px;">
+    <img style="vertical-align: middle;padding-bottom:10px" src="/static/images/{{ image }}" /> </h6>
+    <h6>{{ message.unescape() | safe }}</h6>
+    {% if route == "home" %}
+    <h6>Click <a href="/">here</a> to log in</h6>
+    {% else %}
+    <h6>Click <a href="/{{route}}{% if args %}/{{args}}{% endif %}">here</a> to continue.</h6>
+    {% endif %}
+    </div>
+{% endblock %}
