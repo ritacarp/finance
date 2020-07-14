@@ -41,4 +41,4 @@ class Orders(db.Model):
     shares = db.Column(db.Integer, nullable=True)
     price = db.Column(db.Float, nullable=True)
     extended_price = db.Column(db.Float, nullable=True)
-    order_date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
+    transaction_date = db.Column(db.DateTime, nullable=True, default=datetime.utcnow)
