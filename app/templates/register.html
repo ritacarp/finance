@@ -1,34 +1,97 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Log In
+    {{ title }}
 {% endblock %}
 
 {% block main %}
 
-    <form action="/register" method="post">
-        <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="username" placeholder="Your Email Address" type="text">
-        </div>
-        <div class="form-group border">
-            <a href="#" data-toggle="tooltip" data-placement="right" data-html=true data-placement="right" title="Minimum 6 characters,<br>at least one numeral,<br>at least one uppercase letter,<br>at least one lowercase letter,<br>at least one symbol $!#%_~">
-            <input class="form-control" name="password" placeholder="Password" type="password">
-            </a>
-        </div>
-        <div class="form-group">
-            <input class="form-control" name="verifyPassword" placeholder="Password (again)" type="password">
-        </div>
-        <div class="form-group">
-            <input class="form-control" name="mobile" placeholder="Mobile Phone Number" type="text">
-        </div>
+    <div class="container-fluid pt-3">
+      <div class="row">
 
-        <button class="btn btn-primary" type="submit">Register</button>
+        <div class="col-sm-6">
+
+    <form action="" method="post" novalidate>
+
+        {{ form.hidden_tag() }}
+<table>
+
+
+
+  <tr>
+            <td style="padding-right:10px">{{ form.username.label }}</td>
+               <td class="form-group">
+                 {{ form.username(size="32", autofocus=true, placeholder="Email Address", class="form-control form-control-sm") }}
+                 {% for error in form.username.errors %}
+                    <div style="color: red;">[{{ error }}]</div>
+                 {% endfor %}
+               </td>
+  </tr>
+
+
+
+  <tr>
+               <td style="padding-right:10px">{{ form.mobile.label }}</td>
+               <td class="form-group">
+                   {{ form.mobile(size="32", autofocus=true, placeholder="Mobile Phone Number", class="form-control form-control-sm") }}
+                   {% for error in form.mobile.errors %}
+                   <div style="color: red;">[{{ error }}]</div>
+                   {% endfor %}
+               </td>
+  </tr>
+
+
+
+
+<tr>
+               <td style="padding-right:10px">{{ form.password.label }}</td>
+
+                   <td class="form-group">
+                       {{ form.password(size="32", placeholder="Password", class="form-control form-control-sm") }}
+                       {% for error in form.password.errors %}
+                       <div style="color: red;">[{{ error }}]</div>
+                       {% endfor %}
+                   </td>
+  </tr>
+
+  <tr>
+               <td style="padding-right:10px">{{ form.confirm.label }}</td>
+
+                   <td class="form-group">
+                       {{ form.confirm(size="32", placeholder="Confirm Password", class="form-control form-control-sm") }}
+                       {% for error in form.confirm.errors %}
+                       <div style="color: red;">[{{ error }}]</div>
+                       {% endfor %}
+                   </td>
+  </tr>
+
+
+
+  <tr>
+        <td>{{ form.submit(class="myButton") }}</td>
+  </tr>
+
+</table>
+
     </form>
 
-<script>
-$(document).ready(function(){
-  $('[data-toggle="tooltip"]').tooltip();
-});
+        </div>
 
-</script>
+      <div class="col-sm-6" style="text-align:left">
+         <H6>Password</H6>
+         <ul>
+<li><small>Must be a minimum of 8 characters.</small></li>
+<li><small>Must have at least one numeral.</small></li>
+<li><small>Must have at least one alphabetic letter.</small></li>
+<li><small>Passwords must match.</small></li>
+ </ul>
+      </div>
+
+
+      </div>
+
+
+    </div>
+
+
 {% endblock %}

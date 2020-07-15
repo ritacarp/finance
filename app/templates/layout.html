@@ -27,7 +27,7 @@
     <body>
 
         <nav class="navbar navbar-expand-md navbar-light bg-light border">
-            <a class="navbar-brand" href="/"><span style="font-weight:bold"><span class="text-primary">C</span><span class="text-danger">$</span><span style="color:gold">5</span><span class="text-success">0</span> <span class="text-danger">Finance</span></span></a>
+            <a class="navbar-brand" href="/"><span style="font-weight:bold"><span class="text-primary">R</span><span class="text-danger">I</span><span style="color:gold">T</span><span class="text-success">A</span> <span class="text-danger">Equities</span></span></a>
             <button aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-target="#navbar" data-toggle="collapse" type="button">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -44,13 +44,14 @@
                     </ul>
                 {% else %}
                     <ul class="navbar-nav ml-auto mt-2">
-                        <li class="nav-item"><a class="nav-link" href="/register">Register</a></li>
-                        <li class="nav-item"><a class="nav-link" href="/login">Log In</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Log In</a></li>
                     </ul>
                 {% endif %}
             </div>
         </nav>
 
+        <!--
         {% if get_flashed_messages() %}
             <header>
                 <div class="alert alert-primary border text-center" role="alert">
@@ -58,13 +59,29 @@
                 </div>
             </header>
         {% endif %}
+        -->
+
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+           {% if messages %}
+              {% for category, message in messages %}
+                 <ul style="list-style-type: none;">
+                    <li><img src="/static/images/{{category}}_15.png"> {{ message | safe }}</li>
+                 </ul>
+              {% endfor %}
+           {% endif %}
+        {% endwith %}
+
+
+
 
         <main class="container p-5">
             {% block main %}{% endblock %}
         </main>
 
         <footer class="small text-center text-muted">
-            Data provided for free by <a href="https://iextrading.com/developer">IEX</a>. View <a href="https://iextrading.com/api-exhibit-a/">IEX's Terms of Use</a>.
+            <div>Data provided for free by <a href="https://iextrading.com/developer">IEX</a>. View <a href="https://iextrading.com/api-exhibit-a/">IEX's Terms of Use</a>.</div>
+            <div>Equities designed and maintained by Rita Carp</div>
         </footer>
 
     </body>

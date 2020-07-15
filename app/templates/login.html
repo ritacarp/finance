@@ -6,15 +6,54 @@
 
 {% block main %}
 
-    <form action="/login" method="post">
+    <div class="container-fluid pt-3">
+      <div class="row">
+
+        <div class="col-sm-6">
+
+
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+
         <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="username" value="{{username}}" placeholder="Username" type="text">
-        </div>
-        <div class="form-group">
-            <input class="form-control" name="password" placeholder="Password" value="" type="password">
+            <!-- {{ form.username.label }}<br> -->
+            {{ form.username(size="32", autofocus=true, placeholder="Username", class="form-control form-control-sm") }}
+            {% for error in form.username.errors %}
+            <div style="color: red;">[{{ error }}]</div>
+            {% endfor %}
         </div>
 
-        <button class="btn btn-primary" type="submit">Please Log In</button>
+        <div class="form-group">
+            <!-- {{ form.password.label }}<br> -->
+            {{ form.password(size="32", placeholder="Password", class="form-control form-control-sm") }}
+            {% for error in form.password.errors %}
+            <div style="color: red;">[{{ error }}]</div>
+            {% endfor %}
+       </div>
+
+
+        <div>{{ form.submit(class="myButton") }}</div>
+
+
+        <div><small>New User? <a href="{{ url_for('register') }}">click to register!</a></small></div>
+
+
     </form>
 
+
+
+        </div>
+
+      <div class="col-sm-6" style="text-align:left">
+
+      </div>
+
+
+      </div>
+
+
+    </div>
+
+
 {% endblock %}
+

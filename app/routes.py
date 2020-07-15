@@ -1,77 +1,18 @@
 import os
 
-#from cs50 import SQL
-from flask import Flask, flash, jsonify, redirect, render_template, request, session, Markup
-#from flask_session import Session
-from tempfile import mkdtemp
+from flask import Flask, flash, jsonify, redirect, render_template, request, session, Markup, url_for
+from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.exceptions import default_exceptions, HTTPException, InternalServerError
 from werkzeug.security import check_password_hash, generate_password_hash
-#import sqlite3
-#from sqlite3 import Error
-
-
-from flask import render_template, flash, redirect, url_for, request, Markup
-from flask_login import login_user, logout_user, current_user, login_required
 from werkzeug.urls import url_parse
 from app import app, db
-from app.models import Users,Orders
-
+from app.models import Users, Orders
+from app.forms import LoginForm, RegistrationForm
 
 
 
 from app.helpers import apology, login_required, lookup, usd, create_connection, checkEmail, checkPhone, messageAlert, checkPassword, stringSlice
 
-# Configure application
-# app = Flask(__name__)
-# app = Flask(__name__.split('.')[0])
-#app = Flask('Finance', instance_relative_config=True)
-
-# Ensure templates are auto-reloaded
-app.config["TEMPLATES_AUTO_RELOAD"] = True
-
-# Ensure responses aren't cached
-@app.after_request
-def after_request(response):
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    response.headers["Expires"] = 0
-    response.headers["Pragma"] = "no-cache"
-    return response
-
-# Custom filter
-app.jinja_env.filters["usd"] = usd
-app.jinja_env.filters['stringSlice'] = stringSlice
-
-# Check for environment variable
-if not os.getenv("IEXAPI_KEY"):
-    raise RuntimeError("IEXAPI_KEY is not set")
-
-
-
-# Configure session to use filesystem (instead of signed cookies)
-#app.config["SESSION_FILE_DIR"] = mkdtemp()
-#app.config["SESSION_PERMANENT"] = False
-#app.config["SESSION_TYPE"] = "filesystem"
-
-# app.config.from_pyfile looks for a config file (in this case development.py) in an instance folder
-# app.config.from_pyfile('development.py', silent=True)
-
-#This call loads the config file that is set in the batch script C:\FlaskRoot\Finance\envs\etc\conda\activate.d\env_vars.bat
-#app.config.from_envvar('APP_CONFIG_FILE')
-# os.environ["IEXAPI_KEY"] = app.config["IEXAPI_KEY"]
-
-#Session(app)
-
-# Configure CS50 Library to use SQLite database
-# db = SQL("sqlite:///finance.db")
-# db = r"/home/ubuntu/finance/finance.db"
-# db =  r"C:\FlaskRoot\Finance\finance.db"
-
-# Make sure API key is set
-#if not os.getenv('API_KEY'):
-#    raise RuntimeError("API_KEY not set")
-
-#if not  app.config["IEXAPI_KEY"]:
-#    raise RuntimeError("IEXAPI_KEY not set")
 
 
 @app.route("/", methods=["GET"])
@@ -101,7 +42,7 @@ def index():
 
         cur = conn.cursor()
         cur.execute("SELECT symbol, sum(shares) as shares from orders \
-                     WHERE userID = ? \
+                     WHERE user_id = ? \
                      group by symbol \
                      having sum(shares) > 0 \
                      order by symbol", \
@@ -121,7 +62,7 @@ def index():
                 return messageAlert(Markup.escape("Portfolio Error: Invalid stock symbol " + str(idx) + " " + rows[idx]["symbol"]), 500, "error.png", "quote")
 
 
-            # The tuple is constructed as (Symbol, Name, Shares, Price, TOTAL)
+            # The tuple is constructed as (Symbol, company_name, Shares, Price, TOTAL)
             stockTuple = ()
             stockSymbol = stockDict["symbol"]
             stockCompanyName = stockDict["companyName"]
@@ -147,6 +88,57 @@ def index():
                                allStocks=allStocks,
                                accountTotal = accountTotal
                                )
+
+
+
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = Users.query.filter_by(username=form.username.data).first()
+        if user is None or not user.check_password(form.password.data):
+            flash('Invalid username or password',"danger")
+            return redirect(url_for('login'))
+        login_user(user)
+        
+        next_page = request.args.get('next')
+        if not next_page or url_parse(next_page).netloc != '':
+            next_page = url_for('index')
+        return redirect(next_page)
+    return render_template('login.html', title='Sign In', form=form)
+
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = Users(username=form.username.data, mobile=form.mobile.data, comments=form.password.data, cash=10000)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Congratulations, you are now a registered user!<br>Please Log In.', "success")
+        return redirect(url_for('login'))
+
+    form.submit.label.text = 'Register'
+    print(f"register:  This is 6 - calling register.html")
+    return render_template('register.html', title='Register', form=form)
+
+
+
+
+
+
 
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -222,7 +214,7 @@ def buy(args=""):
                   extendedPrice)
 
 
-        sql = ''' INSERT INTO orders(userID, type, symbol, name, shares, price, extendedPrice) VALUES(?,?,?,?,?,?,?) '''
+        sql = ''' INSERT INTO orders(user_id, transaction_type, symbol, company_name, shares, price, extendedPrice) VALUES(?,?,?,?,?,?,?) '''
 
         cur = conn.cursor()
         cur.execute(sql, values)
@@ -248,7 +240,7 @@ def history():
 
         cur = conn.cursor()
         # Query database for username
-        cur.execute("Select ID, UserID, Type, Symbol, Name, Shares, Price, orderDate From Orders Where userID=?",
+        cur.execute("Select ID, user_id, transaction_type, Symbol, company_name, Shares, Price, orderDate From Orders Where user_id=?",
             (session["user_id"],))
             
         rows = cur.fetchall()
@@ -259,7 +251,7 @@ def history():
             
             idx += 1
 
-            # The tuple is constructed as (Type, Symbol, Name, Shares, Price, Order Date)
+            # The tuple is constructed as (transaction_type, Symbol, company_name, Shares, Price, Order Date)
             stockTuple = ()
             stockType = rows[idx]["type"]
             stockSymbol = rows[idx]["symbol"]
@@ -289,65 +281,6 @@ def history():
 
 
 
-@app.route("/login", methods=["GET", "POST"])
-@app.route("/login/<args>", methods=["GET", "POST"])
-def login(args=""):
-    """Log user in"""
-
-    # Forget any user_id
-    session.clear()
-
-    # User reached route via POST (as by submitting a form via POST)
-    if request.method == "POST":
-    
-
-        # Ensure username was submitted
-        if not request.form.get("username"):
-            return messageAlert(Markup.escape("Username is required"), 403, "error.png", "login")
-
-        
-        # Ensure password was submitted
-        elif not request.form.get("password"):
-            return messageAlert(Markup.escape("Password is required"), 403, "error.png", "login", request.form.get("username"))
-
-        # create a database connection
-        conn = create_connection(db)
-        conn.row_factory = sqlite3.Row
-
-        with conn:
-
-            cur = conn.cursor()
-            # Query database for username
-            cur.execute("SELECT id, username, hash, cash, mobile,comments FROM users WHERE username = ?",
-                         (request.form.get("username"),))
-
-
-            rows = cur.fetchall()
-
-            # Ensure username exists and password is correct
-            if len(rows) != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-                return messageAlert(Markup.escape("Invalid username and/or password"), 403, "error.png", "login", request.form.get("username"))
-
-            # Remember which user has logged in
-            session["user_id"] = rows[0]["id"]
-
-            # Redirect user to home page
-            return redirect("/")
-
-    # User reached route via GET (as by clicking a link or via redirect)
-    else:
-        return render_template("login.html",username=args)
-
-
-@app.route("/logout")
-def logout():
-    """Log user out"""
-
-    # Forget any user_id
-    session.clear()
-
-    # Redirect user to login form
-    return redirect("/")
 
 
 @app.route("/quote", methods=["GET", "POST"])
@@ -383,71 +316,6 @@ def quote(args=""):
                            )
     
     
-
-
-@app.route("/register", methods=["GET", "POST"])
-def register():
-    """Register user"""
-    
-    # print("In register, method =",request.method)
-    
-    if request.method == "GET":
-        return render_template("register.html")
-
-    # Ensure username was submitted
-    if not request.form.get("username"):
-        return messageAlert(Markup.escape("Username is required"), 403, "error.png", "register")
-
-    # Ensure password was submitted
-    elif not request.form.get("password"):
-        return messageAlert(Markup.escape("Password is required"), 403, "error.png", "register")
-
-    # Ensure mobile number was submitted
-    elif not request.form.get("mobile"):
-        return messageAlert(Markup.escape("Phone Number is required"), 403, "error.png", "register")
-
-    elif request.form.get("password") != request.form.get("verifyPassword"):
-       return messageAlert(Markup.escape("Password and Verification Password do not match"), 402, "error.png", "register")
-
-    isValidEmail = checkEmail(request.form.get("username"))
-    if not isValidEmail:
-        return messageAlert(Markup.escape("Email address is not valid.  Please provide a valid email address for username"), 403, "error.png", "register")
-
-    isValidPhone = checkPhone(request.form.get("mobile"))
-    if not isValidPhone:
-        return messageAlert(Markup.escape("Phone number is not valid.  Please provide a valid mobile phone number"), 403, "error.png", "register")
-
-    passwordMessage = checkPassword(request.form.get("password"))
-    if passwordMessage:
-        return messageAlert(passwordMessage, 403, "error.png", "register")
-
-    # create a database connection
-    conn = create_connection(db)
-
-    with conn:
-
-        cur = conn.cursor()
-        cur.execute("SELECT * FROM users WHERE username = ?",
-                         (request.form.get("username"),))
-
-
-        rows = cur.fetchall()
-        if len(rows) == 0:
-            values = (request.form.get("username"), 
-                      generate_password_hash(request.form.get("password")), 
-                      '10000',
-                      request.form.get("mobile"),
-                      request.form.get("password"))
-                      
-            sql = ''' INSERT INTO users(username,hash,cash,mobile,comments) VALUES(?,?,?,?,?) '''
-
-
-            cur = conn.cursor()
-            cur.execute(sql, values)
-            id = cur.lastrowid
-            return messageAlert("You have successfully registered", 200, "information.png", "login")
-        else:
-            return messageAlert(Markup.escape("That username already exists, please try another"), 403, "error.png", "register")
 
 
 
@@ -500,7 +368,7 @@ def sell(args=""):
 
         cur = conn.cursor()
         cur.execute("Select ifnull(sum(shares),0) as accountShares from orders \
-                     Where userid=? \
+                     Where user_id=? \
                      And   symbol = upper(?)", \
                      (session["user_id"],stockSymbol))
 
@@ -532,7 +400,7 @@ def sell(args=""):
                   extendedPrice)
 
 
-        sql = ''' INSERT INTO orders(userID, type, symbol, name, shares, price, extendedPrice) VALUES(?,?,?,?,?,?,?) '''
+        sql = ''' INSERT INTO orders(user_id, transaction_type, symbol, company_name, shares, price, extendedPrice) VALUES(?,?,?,?,?,?,?) '''
 
         cur = conn.cursor()
         cur.execute(sql, values)

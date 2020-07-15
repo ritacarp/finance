@@ -11,4 +11,12 @@ migrate = Migrate(app, db)
 login = LoginManager(app)
 login.login_view = 'login'
 
+
+
 from app import routes, models
+
+from app.helpers import usd, stringSlice
+
+# Custom filter
+app.jinja_env.filters["usd"] = usd
+app.jinja_env.filters['stringSlice'] = stringSlice
