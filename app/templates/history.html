@@ -22,8 +22,14 @@
 
             {% for rows in allStocks %}
             <tr>
+            {% set count = namespace(value=0) %}
                    {% for item in rows %}
-                    <td>{{item}}</td>
+                      {% set count.value = count.value + 1 %}
+                      {% if count.value == 6 %}
+                         <td>{{ moment(item).format('LLL') }}</td>
+                      {% else %}
+                         <td>{{item}}</td>
+                      {% endif %}
                    {% endfor %}
             </tr>
             {% endfor %}
@@ -33,3 +39,4 @@
 
 
 {% endblock %}
+

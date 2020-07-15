@@ -369,12 +369,12 @@ def history():
                 formattedPrice = "${:,.2f}".format(stockPrice)
             
                 orderDate_UTC = rows[idx][7]
-                orderDate_Local = pytz.utc.localize(orderDate_UTC, is_dst=None).astimezone()
-                orderDate_Local = orderDate_Local.strftime("%Y-%m-%d %I:%M:%S %p")
+                #orderDate_Local = pytz.utc.localize(orderDate_UTC, is_dst=None).astimezone()
+                #orderDate_Local = orderDate_Local.strftime("%Y-%m-%d %I:%M:%S %p")
 
             
             
-                stockTuple = (stockType, stockSymbol, stockCompanyName, shares,formattedPrice, orderDate_Local)
+                stockTuple = (stockType, stockSymbol, stockCompanyName, shares,formattedPrice, orderDate_UTC)
                 allStocks.append(stockTuple)
             
             
