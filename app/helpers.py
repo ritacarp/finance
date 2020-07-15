@@ -1,5 +1,5 @@
 import os
-#import requests
+import requests
 import urllib.parse
 #import sqlite3
 #from sqlite3 import Error
@@ -27,21 +27,6 @@ def apology(message, code=400):
             s = s.replace(old, new)
         return s
     return render_template("apology.html", top=code, bottom=escape(message)), code
-
-
-
-def login_required(f):
-    """
-    Decorate routes to require login.
-
-    http://flask.pocoo.org/docs/1.0/patterns/viewdecorators/
-    """
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if session.get("user_id") is None:
-            return redirect("/login")
-        return f(*args, **kwargs)
-    return decorated_function
 
 
 def lookup(symbol):

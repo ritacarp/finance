@@ -32,7 +32,7 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbar">
-                {% if session.user_id %}
+                {% if not current_user.is_anonymous %}
                     <ul class="navbar-nav mr-auto mt-2">
                         <li class="nav-item"><a class="nav-link" href="/quote">Quote</a></li>
                         <li class="nav-item"><a class="nav-link" href="/buy">Buy</a></li>
@@ -66,7 +66,11 @@
            {% if messages %}
               {% for category, message in messages %}
                  <ul style="list-style-type: none;">
-                    <li><img src="/static/images/{{category}}_15.png"> {{ message | safe }}</li>
+                    {% if category %}
+                       <li><img src="/static/images/{{category}}_15.png"> {{ message | safe }}</li>
+                    {% else %}
+                        <li><img src="/static/images/information_15.png"> {{ message | safe }}</li>
+                    {% endif %}
                  </ul>
               {% endfor %}
            {% endif %}
