@@ -6,11 +6,143 @@
 
 {% block main %}
 
-    <form action="/quote" method="post">
+
+    <form action="/quote" method="post" >
+        <input type="hidden" id="startSymbol" name="startSymbol" value="">
         <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="symbol" value = "{{symbol}}" placeholder="Symbol" type="text">
+            <input autocomplete="off" autofocus class="form-control" id="symbol" name="symbol" value = "{{symbol}}" placeholder="Symbol" type="text">
         </div>
-        <button class="btn btn-primary" type="submit">Quote</button>
+        <button type="button" id="ajaxGetStockQuoteButton"  class="btn btn-primary"  {% if symbol == '' %} disabled {% endif %} >Quote</button>
+
+        <div style="display:block;height: 115px;  min-height:115px">
+           <div style="padding-top:15px">
+              <div id="result"></div>
+           </div>
+
+           <div style="padding-top:15px">
+              <button type="button" id="buyButton" name="buyButton"  class="btn btn-primary" style="display: none">Buy {{symbol}}</button>
+              <button type="button" id="sellButton" name="sellButton"  class="btn btn-primary" style="display: none" >Sell {{symbol}}</button>
+           </div>
+        </div>
+
+
+
     </form>
 
+
+<script>
+
+
+   function ajaxGetStockQuote() {
+
+      // Initialize new request
+      const request = new XMLHttpRequest();
+      const symbol = document.querySelector('#symbol').value;
+      request.open('POST', '/getStockQuote');
+
+      // Send request
+      const data = new FormData();
+      data.append('symbol', symbol);
+
+      request.send(data);
+
+
+      request.onload = () => {
+         var data = JSON.parse(request.responseText);
+
+         //alert("the stock price is " + data.stockLatestPrice)
+
+         if (data.success) {
+            var contents = `<h6>A share of ${data.stockCompanyName} (${data.stockSymbol}) costs ${data.stockLatestPrice}.</h6>`
+            document.querySelector('#result').innerHTML = contents;
+
+
+            document.querySelector('#buyButton').style.display = "inline";
+            document.querySelector('#buyButton').disabled = false;
+
+            document.querySelector('#sellButton').style.display = "inline";
+            document.querySelector('#sellButton').disabled = false;
+
+            document.querySelector('#startSymbol').value = data.stockSymbol
+            document.querySelector('#buyButton').innerHTML = "Buy " + data.stockSymbol;
+            document.querySelector('#sellButton').innerHTML = "Sell " + data.stockSymbol;
+
+            //$('#startSymbol').val() = data.stockSymbol
+
+            //$('#sellButton').attr("disabled",false )
+            //$('#sellButton').attr("display","inline" )
+
+         }
+         else {
+            var contents = `You have requested an invalid stock symbol ${data.stockSymbol}.<br>Please try again.`
+            document.querySelector('#result').innerHTML = contents;
+
+            //$('#buyButton').attr("disabled",true )
+            $('#buyButton').attr("display","None" )
+
+            //$('#sellButton').attr("disabled",true )
+            $('#sellButton').attr("display","None" )
+
+         }
+      }
+
+      return false;
+
+
+      //alert("ajaxGetStockQuoteButton clicked  value is " + symbol)
+   }
+
+   {% if symbol != '' %}
+   $(document).ready(function(){
+      ajaxGetStockQuote()
+   });
+   {% endif %}
+
+
+   // Enable button only if there is text in the input field
+   $('#symbol').on('keyup', function () {
+      var vSymbol = $('#symbol').val()
+      if (vSymbol.length > 0) {
+         $('#ajaxGetStockQuoteButton').attr("disabled",false )
+         var vStartSymboll = $('#startSymbol').val()
+         if (vStartSymboll != vSymbol) {
+            document.querySelector('#result').innerHTML = "&nbsp;"
+
+            document.querySelector('#buyButton').style.display = "none";
+            document.querySelector('#buyButton').disabled = true;
+
+            document.querySelector('#sellButton').style.display = "none";
+            document.querySelector('#sellButton').disabled = true;
+
+
+            }
+         }
+      else {
+        $('#ajaxGetStockQuoteButton').attr("disabled",true )
+        document.querySelector('#buyButton').disabled = true;
+        document.querySelector('#sellButton').disabled = true;
+
+        }
+  });
+
+
+   $('#ajaxGetStockQuoteButton').on('click', function () {
+      ajaxGetStockQuote()
+   });
+
+
+  $('#buyButton').on('click', function () {
+     var thisSymbol = document.querySelector('#symbol').value;
+     var url = "/buy/" + thisSymbol
+     window.location.assign(url);
+  });
+
+
+  $('#sellButton').on('click', function () {
+     var thisSymbol = document.querySelector('#symbol').value;
+     var url = "/sell/" + thisSymbol
+     window.location.assign(url);
+  });
+
+</script>
 {% endblock %}

@@ -25,7 +25,7 @@
      thisSymbol = thisID.replace("sell_", "")
      var url = "/sell/" + thisSymbol
      //var url = "{{ url_for('sell', args='ARGUMENTS') }}".replace("ARGUMENTS", thisSymbol)
-     window.location.replace(url);
+     window.location.assign(url);
 
   });
 
@@ -34,7 +34,7 @@
      var thisID = $(this).attr("id" )
      thisSymbol = thisID.replace("buy_", "")
      var url = "/buy/" + thisSymbol
-     window.location.replace(url);
+     window.location.assign(url);
 
   });
 

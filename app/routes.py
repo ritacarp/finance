@@ -555,6 +555,46 @@ def errorhandler(e):
     return apology(e.name, e.code)
 
 
+
+
+
+@app.route("/getStockQuote", methods=["POST"])
+def getStockQuote():
+
+    print("1) in route getStockQuote")
+
+    # Query for currency exchange rate
+    symbol = request.form.get("symbol")
+    
+    print(f"2) in route getStockQuote, symbol = {symbol}")
+      
+
+    stockDict = lookup(symbol)
+    if not stockDict:
+        #message = "You have requested an invalid stock symbol " + symbol + ".<br>Please try again."
+        return jsonify({"success": False, 
+                        "stockSymbol": symbol,
+                        "stockCompanyName": "",
+                        "stockLatestPrice": "",
+                        "title": ""})
+
+      
+      
+    stockSymbol = stockDict["symbol"]
+    stockCompanyName = stockDict["companyName"]
+    stockLatestPrice = stockDict["latestPrice"]
+    title = "Quote: Stock Symbol " + stockSymbol
+
+    print(f"3) getStockQuote: done returning stock price {stockLatestPrice}, for company {stockCompanyName}")
+    return jsonify({"success": True, 
+                     "stockSymbol": stockSymbol,
+                     "stockCompanyName": stockCompanyName,
+                     "stockLatestPrice": stockLatestPrice,
+                     "title": title})
+
+
+
+
 # Listen for errors
 for code in default_exceptions:
     app.errorhandler(code)(errorhandler)
